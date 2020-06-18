@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <title>许久没道过早安的后台</title>
+    <style>
+        #add {
+            float: left;
+            margin-left: 30px;
+        }
+
+        #label {
+
+            height: 50px;
+            background-color: yellow;
+        }
+
+        body .label #label_add {
+            padding: 10px;
+            width: 400px;
+        }
+
+        body .label #label_btn {
+            margin-left: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="body">
+    <div class="layui-fluid">
+        {include file='public/sider' /}
+        <div id="main">
+            {include file='public/header' /}
+
+            <div class="layui-fluid" id="body">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <button class="layui-btn" id="add">
+                            添加
+                        </button>
+                        <table id="label" lay-filter="test"></table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="/static/layui/layui.js"></script>
+<script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+    var height = window.screen.availHeight;
+    document.getElementById('body').style.height = parseInt(height) - 190 + "px";
+    document.getElementById('sider').style.height = parseInt(height) - 165 + "px";
+    layui.use(['jquery', 'layer', 'table', 'form'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var table = layui.table;
+        var form = layui.form;
+        // 渲染表格
+        table.render({
+            elem: '#label',
+            height: 600,
+            url: "{:url('article/label_data')}",
+            page: true,
+            limit: 10,
+            cols: [[
+                {field: 'id', title: 'ID', width: 100, fixed: 'left'},
+                {field: 'label', title: '类别名',},
+                {field: 'add_time', title: '添加时间', width: 200, sort: true},
+                {fixed: 'right', width: 100, toolbar: '#bar'},
+            ]]
+        });
+        //监听工具条
+        table.on('tool(test)', function (obj) {
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+
+            if (layEvent === 'del') { //删除
+                layer.confirm('真的删除行么', function(index){
+
+                    $.ajax({
+                        async: true,
+                        type: "POST",
+                        url: "{:url('article/label_del')}",
+                        data: obj.data,
+                        success:function(res){
+                            if(res.status==200){
+                                obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                                layer.close(index);
+                            }else{
+                                layer.msg(res.msg);
+                            }
+                        }
+                    })
+                });
+            }
+        });
+        // 添加事件
+        $('#add').click(function () {
+            layer.open({
+                type: 1,
+                title: '新增类别',
+                area: ['500px', '170px'],
+                skin: 'label',
+                content: '<div class="layui-form" id="label_add">' +
+                    '<div class="layui-form-item">\n' +
+                    '<label class="layui-form-label">\n' +
+                    '分类名\n' +
+                    '</label>\n' +
+                    '<div class="layui-input-block">\n' +
+                    '<input type="text" name="label" placeholder="请输入" autocomplete="off" class="layui-input">\n' +
+                    '</div>\n' +
+                    '</div>' +
+                    '<div class="layui-form-item">\n' +
+                    '<button class="layui-btn" id="label_btn" lay-submit lay-filter="form">提交</button>\n' +
+                    '</div>' +
+                    '</div>'
+            })
+        });
+        // 添加操作
+        form.on('submit(form)', function (data) {
+            $.ajax({
+                async: true,
+                type: "POST",
+                url: "{:url('article/label_add')}",
+                data: data.field,
+                success: function (data) {
+                    if (data.stuts == 200) {
+                        layer.msg(data.msg);
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                }
+            });
+            return false;
+        });
+    });
+
+</script>
+</body>
+</html>

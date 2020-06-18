@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/home.css">
+    <title>许久没道过早安的博客</title>
+    <style>
+        #main{
+            margin-top:50px;
+        }
+        #form{
+            margin: 10px auto;
+            background-color: white;
+        }
+        #submit{
+            margin-left: 45%;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="body">
+    <div></div>
+    {include file='public/header' /}
+    <div></div>
+
+    <div></div>
+    <div id="main" class="layui-container">
+<!--        <h2>目前不支持图片上传，请见谅</h2>-->
+        <div class="layui-form" id="form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    请留言
+                </label>
+                <textarea name="message" id="edit" lay-verify="message">
+
+                </textarea>
+            </div>
+            <div id="submit">
+                <div class="layui-form-item">
+                    <button class="layui-btn" lay-submit lay-filter="form">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div></div>
+
+    <div></div>
+    {include file='public/footer' /}
+    <div></div>
+</div>
+<script src="/static/layui/layui.js"></script>
+<script>
+    height = window.innerHeight;
+    document.getElementById('body').style.height = parseInt(height)+'px';
+    layui.use(['jquery','form','layer','layedit'],function() {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var layedit = layui.layedit;
+        var layer = layui.layer;
+        // 注册一个富文本编辑器
+        var edit = layedit.build('edit', {
+            height: 400,
+            tool: [
+                'strong' //加粗
+                ,'italic' //斜体
+                ,'underline' //下划线
+                ,'del' //删除线
+
+                ,'|' //分割线
+
+                ,'left' //左对齐
+                ,'center' //居中对齐
+                ,'right' //右对齐
+                ,'|' //分割线
+                ,'link' //超链接
+                ,'unlink' //清除链接
+                ,'face' //表情
+            ]
+        });
+        // 采集富文本编辑器里的值
+        form.verify({
+            message: function (value) {
+                layedit.sync(edit);
+            }
+        });
+        form.on('submit(form)',function(data){
+            $.ajax({
+                async: true,
+                type: "POST",
+                url: "{:url('index/message_add')}",
+                data: data.field,
+                success:function(data){
+                    if(data.status == 200){
+                        layer.msg(data.msg);
+                    }else{
+                        layer.msg(data.msg);
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
